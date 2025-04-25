@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SKALE Token Distribution</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 80vw;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    #chart {
+      width: 100%;
+      height: 500px;
+    }
+    .tooltip {
+      position: absolute;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      pointer-events: none;
+      font-size: 14px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+      margin-bottom: 10px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border-radius: 4px;
+    }
+    .area {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SKALE Token Distribution</h1>
+    <p class="subtitle">Tracking token allocation over time</p>
+    <div id="chart"></div>
+    <div id="legend" class="legend"></div>
+  </div>
+
+  <script>
+    const data = [
+     {
+       "End of Month": 0,
+       "Validators Rewards": 0,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 85000000,
+       "Early Supporters": 0,
+       "Public Allocation": 0,
+       "Circulating Supply": 336339292,
+       "Total Supply": 4140000000,
+       "Circulating / Total": "8.12%"
+     },
+     {
+       "End of Month": 1,
+       "Validators Rewards": 32083333,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 85000000,
+       "Early Supporters": 0,
+       "Public Allocation": 0,
+       "Circulating Supply": 368422625,
+       "Total Supply": 4172083333,
+       "Circulating / Total": "8.83%"
+     },
+     {
+       "End of Month": 2,
+       "Validators Rewards": 64166667,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 85000000,
+       "Early Supporters": 0,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 569059168,
+       "Total Supply": 4204166667,
+       "Circulating / Total": "13.54%"
+     },
+     {
+       "End of Month": 3,
+       "Validators Rewards": 96250000,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 85000000,
+       "Early Supporters": 0,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 601142501,
+       "Total Supply": 4236250000,
+       "Circulating / Total": "14.19%"
+     },
+     {
+       "End of Month": 4,
+       "Validators Rewards": 128333333,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 85000000,
+       "Early Supporters": 0,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 633225834,
+       "Total Supply": 4268333333,
+       "Circulating / Total": "14.84%"
+     },
+     {
+       "End of Month": 5,
+       "Validators Rewards": 160416667,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 85000000,
+       "Early Supporters": 0,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 665309168,
+       "Total Supply": 4300416667,
+       "Circulating / Total": "15.47%"
+     },
+     {
+       "End of Month": 6,
+       "Validators Rewards": 192500000,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 197710524,
+       "Early Supporters": 116666667,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 926769692,
+       "Total Supply": 4882500000,
+       "Circulating / Total": "18.98%"
+     },
+     {
+       "End of Month": 7,
+       "Validators Rewards": 224583333,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 197710524,
+       "Early Supporters": 116666667,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 958853025,
+       "Total Supply": 4914583333,
+       "Circulating / Total": "19.51%"
+     },
+     {
+       "End of Month": 8,
+       "Validators Rewards": 256666667,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 197710524,
+       "Early Supporters": 116666667,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 990936359,
+       "Total Supply": 4946666667,
+       "Circulating / Total": "20.03%"
+     },
+     {
+       "End of Month": 9,
+       "Validators Rewards": 288750000,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 197710524,
+       "Early Supporters": 306747263,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 1213100288,
+       "Total Supply": 4978750000,
+       "Circulating / Total": "24.37%"
+     },
+     {
+       "End of Month": 10,
+       "Validators Rewards": 320833333,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 197710524,
+       "Early Supporters": 306747263,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 1245183622,
+       "Total Supply": 5010833333,
+       "Circulating / Total": "24.85%"
+     },
+     {
+       "End of Month": 11,
+       "Validators Rewards": 352916667,
+       "Broader Founding Team": 0,
+       "Core Team Pool": 0,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 101339292,
+       "Protocol Development Fund": 197710524,
+       "Early Supporters": 306747263,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 1277266955,
+       "Total Supply": 5042916667,
+       "Circulating / Total": "25.33%"
+     },
+     {
+       "End of Month": 12,
+       "Validators Rewards": 385000000,
+       "Broader Founding Team": 280000000,
+       "Core Team Pool": 70000000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 423413929,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 2114148528,
+       "Total Supply": 5075000000,
+       "Circulating / Total": "41.66%"
+     },
+     {
+       "End of Month": 13,
+       "Validators Rewards": 413875000,
+       "Broader Founding Team": 280000000,
+       "Core Team Pool": 70000000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 658066223,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 2377675822,
+       "Total Supply": 5103875000,
+       "Circulating / Total": "46.59%"
+     },
+     {
+       "End of Month": 14,
+       "Validators Rewards": 442750000,
+       "Broader Founding Team": 280000000,
+       "Core Team Pool": 70000000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 892718516,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 2641203115,
+       "Total Supply": 5132750000,
+       "Circulating / Total": "51.46%"
+     },
+     {
+       "End of Month": 15,
+       "Validators Rewards": 471625000,
+       "Broader Founding Team": 350000000,
+       "Core Team Pool": 87500000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1317451405,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3182311004,
+       "Total Supply": 5161625000,
+       "Circulating / Total": "61.65%"
+     },
+     {
+       "End of Month": 16,
+       "Validators Rewards": 500500000,
+       "Broader Founding Team": 350000000,
+       "Core Team Pool": 87500000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1322491236,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3216225835,
+       "Total Supply": 5190500000,
+       "Circulating / Total": "61.96%"
+     },
+     {
+       "End of Month": 17,
+       "Validators Rewards": 529375000,
+       "Broader Founding Team": 350000000,
+       "Core Team Pool": 87500000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1322491236,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3245100835,
+       "Total Supply": 5219375000,
+       "Circulating / Total": "62.17%"
+     },
+     {
+       "End of Month": 18,
+       "Validators Rewards": 558250000,
+       "Broader Founding Team": 420000000,
+       "Core Team Pool": 105000000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1434118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3473102671,
+       "Total Supply": 5248250000,
+       "Circulating / Total": "66.18%"
+     },
+     {
+       "End of Month": 19,
+       "Validators Rewards": 587125000,
+       "Broader Founding Team": 420000000,
+       "Core Team Pool": 105000000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1434118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3501977671,
+       "Total Supply": 5277125000,
+       "Circulating / Total": "66.36%"
+     },
+     {
+       "End of Month": 20,
+       "Validators Rewards": 616000000,
+       "Broader Founding Team": 420000000,
+       "Core Team Pool": 105000000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1434118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3530852671,
+       "Total Supply": 5306000000,
+       "Circulating / Total": "66.54%"
+     },
+     {
+       "End of Month": 21,
+       "Validators Rewards": 644875000,
+       "Broader Founding Team": 490000000,
+       "Core Team Pool": 122500000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1434118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3647227671,
+       "Total Supply": 5334875000,
+       "Circulating / Total": "68.37%"
+     },
+     {
+       "End of Month": 22,
+       "Validators Rewards": 673750000,
+       "Broader Founding Team": 490000000,
+       "Core Team Pool": 122500000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1434118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3676102671,
+       "Total Supply": 5363750000,
+       "Circulating / Total": "68.54%"
+     },
+     {
+       "End of Month": 23,
+       "Validators Rewards": 702625000,
+       "Broader Founding Team": 490000000,
+       "Core Team Pool": 122500000,
+       "SKALE Foundation": 150000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1434118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3704977671,
+       "Total Supply": 5392625000,
+       "Circulating / Total": "68.70%"
+     },
+     {
+       "End of Month": 24,
+       "Validators Rewards": 731500000,
+       "Broader Founding Team": 560000000,
+       "Core Team Pool": 140000000,
+       "SKALE Foundation": 200000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1550784739,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 3988019337,
+       "Total Supply": 5421500000,
+       "Circulating / Total": "73.56%"
+     },
+     {
+       "End of Month": 25,
+       "Validators Rewards": 757166667,
+       "Broader Founding Team": 560000000,
+       "Core Team Pool": 140000000,
+       "SKALE Foundation": 200000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1550784739,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4013686004,
+       "Total Supply": 5447166667,
+       "Circulating / Total": "73.68%"
+     },
+     {
+       "End of Month": 26,
+       "Validators Rewards": 782833333,
+       "Broader Founding Team": 560000000,
+       "Core Team Pool": 140000000,
+       "SKALE Foundation": 200000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1550784739,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4039352671,
+       "Total Supply": 5472833333,
+       "Circulating / Total": "73.81%"
+     },
+     {
+       "End of Month": 27,
+       "Validators Rewards": 808500000,
+       "Broader Founding Team": 630000000,
+       "Core Team Pool": 157500000,
+       "SKALE Foundation": 200000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1550784739,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4152519337,
+       "Total Supply": 5498500000,
+       "Circulating / Total": "75.52%"
+     },
+     {
+       "End of Month": 28,
+       "Validators Rewards": 834166667,
+       "Broader Founding Team": 630000000,
+       "Core Team Pool": 157500000,
+       "SKALE Foundation": 200000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1550784739,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4178186004,
+       "Total Supply": 5524166667,
+       "Circulating / Total": "75.63%"
+     },
+     {
+       "End of Month": 29,
+       "Validators Rewards": 859833333,
+       "Broader Founding Team": 630000000,
+       "Core Team Pool": 157500000,
+       "SKALE Foundation": 200000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1550784739,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4203852671,
+       "Total Supply": 5549833333,
+       "Circulating / Total": "75.75%"
+     },
+     {
+       "End of Month": 30,
+       "Validators Rewards": 885500000,
+       "Broader Founding Team": 700000000,
+       "Core Team Pool": 175000000,
+       "SKALE Foundation": 250000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1667451405,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4483686004,
+       "Total Supply": 5575500000,
+       "Circulating / Total": "80.42%"
+     },
+     {
+       "End of Month": 31,
+       "Validators Rewards": 911166667,
+       "Broader Founding Team": 700000000,
+       "Core Team Pool": 175000000,
+       "SKALE Foundation": 250000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1667451405,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4509352671,
+       "Total Supply": 5601166667,
+       "Circulating / Total": "80.51%"
+     },
+     {
+       "End of Month": 32,
+       "Validators Rewards": 936833333,
+       "Broader Founding Team": 700000000,
+       "Core Team Pool": 175000000,
+       "SKALE Foundation": 250000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1667451405,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4535019337,
+       "Total Supply": 5626833333,
+       "Circulating / Total": "80.60%"
+     },
+     {
+       "End of Month": 33,
+       "Validators Rewards": 962500000,
+       "Broader Founding Team": 770000000,
+       "Core Team Pool": 192500000,
+       "SKALE Foundation": 250000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1667451405,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4648186004,
+       "Total Supply": 5652500000,
+       "Circulating / Total": "82.23%"
+     },
+     {
+       "End of Month": 34,
+       "Validators Rewards": 988166667,
+       "Broader Founding Team": 770000000,
+       "Core Team Pool": 192500000,
+       "SKALE Foundation": 250000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1667451405,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4673852671,
+       "Total Supply": 5678166667,
+       "Circulating / Total": "82.31%"
+     },
+     {
+       "End of Month": 35,
+       "Validators Rewards": 1013833333,
+       "Broader Founding Team": 770000000,
+       "Core Team Pool": 192500000,
+       "SKALE Foundation": 250000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1667451405,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4699519337,
+       "Total Supply": 5703833333,
+       "Circulating / Total": "82.39%"
+     },
+     {
+       "End of Month": 36,
+       "Validators Rewards": 1039500000,
+       "Broader Founding Team": 840000000,
+       "Core Team Pool": 210000000,
+       "SKALE Foundation": 300000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 4979352671,
+       "Total Supply": 5729500000,
+       "Circulating / Total": "86.91%"
+     },
+     {
+       "End of Month": 37,
+       "Validators Rewards": 1061958333,
+       "Broader Founding Team": 840000000,
+       "Core Team Pool": 210000000,
+       "SKALE Foundation": 300000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5001811004,
+       "Total Supply": 5751958333,
+       "Circulating / Total": "86.96%"
+     },
+     {
+       "End of Month": 38,
+       "Validators Rewards": 1084416667,
+       "Broader Founding Team": 840000000,
+       "Core Team Pool": 210000000,
+       "SKALE Foundation": 300000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5024269337,
+       "Total Supply": 5774416667,
+       "Circulating / Total": "87.01%"
+     },
+     {
+       "End of Month": 39,
+       "Validators Rewards": 1106875000,
+       "Broader Founding Team": 910000000,
+       "Core Team Pool": 227500000,
+       "SKALE Foundation": 300000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5134227671,
+       "Total Supply": 5796875000,
+       "Circulating / Total": "88.57%"
+     },
+     {
+       "End of Month": 40,
+       "Validators Rewards": 1129333333,
+       "Broader Founding Team": 910000000,
+       "Core Team Pool": 227500000,
+       "SKALE Foundation": 300000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5156686004,
+       "Total Supply": 5819333333,
+       "Circulating / Total": "88.61%"
+     },
+     {
+       "End of Month": 41,
+       "Validators Rewards": 1151791667,
+       "Broader Founding Team": 910000000,
+       "Core Team Pool": 227500000,
+       "SKALE Foundation": 300000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5179144337,
+       "Total Supply": 5841791667,
+       "Circulating / Total": "88.66%"
+     },
+     {
+       "End of Month": 42,
+       "Validators Rewards": 1174250000,
+       "Broader Founding Team": 980000000,
+       "Core Team Pool": 245000000,
+       "SKALE Foundation": 350000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5339102671,
+       "Total Supply": 5864250000,
+       "Circulating / Total": "91.04%"
+     },
+     {
+       "End of Month": 43,
+       "Validators Rewards": 1196708333,
+       "Broader Founding Team": 980000000,
+       "Core Team Pool": 245000000,
+       "SKALE Foundation": 350000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5361561004,
+       "Total Supply": 5886708333,
+       "Circulating / Total": "91.08%"
+     },
+     {
+       "End of Month": 44,
+       "Validators Rewards": 1219166667,
+       "Broader Founding Team": 980000000,
+       "Core Team Pool": 245000000,
+       "SKALE Foundation": 350000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5384019337,
+       "Total Supply": 5909166667,
+       "Circulating / Total": "91.11%"
+     },
+     {
+       "End of Month": 45,
+       "Validators Rewards": 1241625000,
+       "Broader Founding Team": 1050000000,
+       "Core Team Pool": 262500000,
+       "SKALE Foundation": 350000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5493977671,
+       "Total Supply": 5931625000,
+       "Circulating / Total": "92.62%"
+     },
+     {
+       "End of Month": 46,
+       "Validators Rewards": 1264083333,
+       "Broader Founding Team": 1050000000,
+       "Core Team Pool": 262500000,
+       "SKALE Foundation": 350000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5516436004,
+       "Total Supply": 5954083333,
+       "Circulating / Total": "92.65%"
+     },
+     {
+       "End of Month": 47,
+       "Validators Rewards": 1286541667,
+       "Broader Founding Team": 1050000000,
+       "Core Team Pool": 262500000,
+       "SKALE Foundation": 350000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5538894337,
+       "Total Supply": 5976541667,
+       "Circulating / Total": "92.68%"
+     },
+     {
+       "End of Month": 48,
+       "Validators Rewards": 1309000000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 400000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5698852671,
+       "Total Supply": 5999000000,
+       "Circulating / Total": "95.00%"
+     },
+     {
+       "End of Month": 49,
+       "Validators Rewards": 1328250000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 400000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5718102671,
+       "Total Supply": 6018250000,
+       "Circulating / Total": "95.01%"
+     },
+     {
+       "End of Month": 50,
+       "Validators Rewards": 1347500000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 400000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5737352671,
+       "Total Supply": 6037500000,
+       "Circulating / Total": "95.03%"
+     },
+     {
+       "End of Month": 51,
+       "Validators Rewards": 1366750000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 400000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5756602671,
+       "Total Supply": 6056750000,
+       "Circulating / Total": "95.04%"
+     },
+     {
+       "End of Month": 52,
+       "Validators Rewards": 1386000000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 400000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5775852671,
+       "Total Supply": 6076000000,
+       "Circulating / Total": "95.06%"
+     },
+     {
+       "End of Month": 53,
+       "Validators Rewards": 1405250000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 400000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5795102671,
+       "Total Supply": 6095250000,
+       "Circulating / Total": "95.08%"
+     },
+     {
+       "End of Month": 54,
+       "Validators Rewards": 1424500000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 450000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5864352671,
+       "Total Supply": 6114500000,
+       "Circulating / Total": "95.91%"
+     },
+     {
+       "End of Month": 55,
+       "Validators Rewards": 1443750000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 450000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5883602671,
+       "Total Supply": 6133750000,
+       "Circulating / Total": "95.92%"
+     },
+     {
+       "End of Month": 56,
+       "Validators Rewards": 1463000000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 450000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5902852671,
+       "Total Supply": 6153000000,
+       "Circulating / Total": "95.93%"
+     },
+     {
+       "End of Month": 57,
+       "Validators Rewards": 1482250000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 450000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5922102671,
+       "Total Supply": 6172250000,
+       "Circulating / Total": "95.95%"
+     },
+     {
+       "End of Month": 58,
+       "Validators Rewards": 1501500000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 450000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5941352671,
+       "Total Supply": 6191500000,
+       "Circulating / Total": "95.96%"
+     },
+     {
+       "End of Month": 59,
+       "Validators Rewards": 1520750000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 450000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 5960602671,
+       "Total Supply": 6210750000,
+       "Circulating / Total": "95.97%"
+     },
+     {
+       "End of Month": 60,
+       "Validators Rewards": 1540000000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 500000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6029852671,
+       "Total Supply": 6230000000,
+       "Circulating / Total": "96.79%"
+     },
+     {
+       "End of Month": 61,
+       "Validators Rewards": 1556041667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 500000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6045894337,
+       "Total Supply": 6246041667,
+       "Circulating / Total": "96.80%"
+     },
+     {
+       "End of Month": 62,
+       "Validators Rewards": 1572083333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 500000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6061936004,
+       "Total Supply": 6262083333,
+       "Circulating / Total": "96.80%"
+     },
+     {
+       "End of Month": 63,
+       "Validators Rewards": 1588125000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 500000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6077977671,
+       "Total Supply": 6278125000,
+       "Circulating / Total": "96.81%"
+     },
+     {
+       "End of Month": 64,
+       "Validators Rewards": 1604166667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 500000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6094019337,
+       "Total Supply": 6294166667,
+       "Circulating / Total": "96.82%"
+     },
+     {
+       "End of Month": 65,
+       "Validators Rewards": 1620208333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 500000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6110061004,
+       "Total Supply": 6310208333,
+       "Circulating / Total": "96.83%"
+     },
+     {
+       "End of Month": 66,
+       "Validators Rewards": 1636250000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 550000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6176102671,
+       "Total Supply": 6326250000,
+       "Circulating / Total": "97.63%"
+     },
+     {
+       "End of Month": 67,
+       "Validators Rewards": 1652291667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 550000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6192144337,
+       "Total Supply": 6342291667,
+       "Circulating / Total": "97.63%"
+     },
+     {
+       "End of Month": 68,
+       "Validators Rewards": 1668333333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 550000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6208186004,
+       "Total Supply": 6358333333,
+       "Circulating / Total": "97.64%"
+     },
+     {
+       "End of Month": 69,
+       "Validators Rewards": 1684375000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 550000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6224227671,
+       "Total Supply": 6374375000,
+       "Circulating / Total": "97.64%"
+     },
+     {
+       "End of Month": 70,
+       "Validators Rewards": 1700416667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 550000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6240269337,
+       "Total Supply": 6390416667,
+       "Circulating / Total": "97.65%"
+     },
+     {
+       "End of Month": 71,
+       "Validators Rewards": 1716458333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 550000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6256311004,
+       "Total Supply": 6406458333,
+       "Circulating / Total": "97.66%"
+     },
+     {
+       "End of Month": 72,
+       "Validators Rewards": 1732500000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 600000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6322352671,
+       "Total Supply": 6422500000,
+       "Circulating / Total": "98.44%"
+     },
+     {
+       "End of Month": 73,
+       "Validators Rewards": 1740520833,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 600000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6330373504,
+       "Total Supply": 6430520833,
+       "Circulating / Total": "98.44%"
+     },
+     {
+       "End of Month": 74,
+       "Validators Rewards": 1748541667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 600000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6338394337,
+       "Total Supply": 6438541667,
+       "Circulating / Total": "98.44%"
+     },
+     {
+       "End of Month": 75,
+       "Validators Rewards": 1756562500,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 600000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6346415171,
+       "Total Supply": 6446562500,
+       "Circulating / Total": "98.45%"
+     },
+     {
+       "End of Month": 76,
+       "Validators Rewards": 1764583333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 600000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6354436004,
+       "Total Supply": 6454583333,
+       "Circulating / Total": "98.45%"
+     },
+     {
+       "End of Month": 77,
+       "Validators Rewards": 1772604167,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 600000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6362456837,
+       "Total Supply": 6462604167,
+       "Circulating / Total": "98.45%"
+     },
+     {
+       "End of Month": 78,
+       "Validators Rewards": 1780625000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 650000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6420477671,
+       "Total Supply": 6470625000,
+       "Circulating / Total": "99.23%"
+     },
+     {
+       "End of Month": 79,
+       "Validators Rewards": 1788645833,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 650000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6428498504,
+       "Total Supply": 6478645833,
+       "Circulating / Total": "99.23%"
+     },
+     {
+       "End of Month": 80,
+       "Validators Rewards": 1796666667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 650000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6436519337,
+       "Total Supply": 6486666667,
+       "Circulating / Total": "99.23%"
+     },
+     {
+       "End of Month": 81,
+       "Validators Rewards": 1804687500,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 650000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6444540171,
+       "Total Supply": 6494687500,
+       "Circulating / Total": "99.23%"
+     },
+     {
+       "End of Month": 82,
+       "Validators Rewards": 1812708333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 650000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6452561004,
+       "Total Supply": 6502708333,
+       "Circulating / Total": "99.23%"
+     },
+     {
+       "End of Month": 83,
+       "Validators Rewards": 1820729167,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 650000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6460581837,
+       "Total Supply": 6510729167,
+       "Circulating / Total": "99.23%"
+     },
+     {
+       "End of Month": 84,
+       "Validators Rewards": 1828750000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6518602671,
+       "Total Supply": 6518750000,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 85,
+       "Validators Rewards": 1836770833,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6526623504,
+       "Total Supply": 6526770833,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 86,
+       "Validators Rewards": 1844791667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6534644337,
+       "Total Supply": 6534791667,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 87,
+       "Validators Rewards": 1852812500,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6542665171,
+       "Total Supply": 6542812500,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 88,
+       "Validators Rewards": 1860833333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6550686004,
+       "Total Supply": 6550833333,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 89,
+       "Validators Rewards": 1868854167,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6558706837,
+       "Total Supply": 6558854167,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 90,
+       "Validators Rewards": 1876875000,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6566727671,
+       "Total Supply": 6566875000,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 91,
+       "Validators Rewards": 1884895833,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6574748504,
+       "Total Supply": 6574895833,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 92,
+       "Validators Rewards": 1892916667,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6582769337,
+       "Total Supply": 6582916667,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 93,
+       "Validators Rewards": 1900937500,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6590790171,
+       "Total Supply": 6590937500,
+       "Circulating / Total": "100.00%"
+     },
+     {
+       "End of Month": 94,
+       "Validators Rewards": 1908958333,
+       "Broader Founding Team": 1120000000,
+       "Core Team Pool": 280000000,
+       "SKALE Foundation": 700000000,
+       "Ecosystem Fund": 326760341,
+       "Protocol Development Fund": 310421049,
+       "Early Supporters": 1784118072,
+       "Public Allocation": 168553209,
+       "Circulating Supply": 6598811004,
+       "Total Supply": 6598958333,
+       "Circulating / Total": "100.00%"
+     }
+    ];
+
+    const startMonth = new Date(2020, 10);
+
+    function monthDifference(dateFrom, dateTo = new Date()) {
+      return dateTo.getMonth() - dateFrom.getMonth() + (12 * (dateTo.getFullYear() - dateFrom.getFullYear()));
+    }
+
+    function selectMonth(monthSince) {
+      const month = data.find((o) => {
+          return o["End of Month"] === monthSince + 1;
+      });
+
+      if (!month) {
+          throw new Error("Month Not Found");
+      }
+
+      return month;
+    }
+
+    function getDateFromIndex(index) {
+      const startMonth = 9; // October is month 9 (0-based)
+      const startYear = 2020;
+
+      const totalMonths = startMonth + index;
+      const year = startYear + Math.floor(totalMonths / 12);
+      const month = totalMonths % 12;
+
+      return new Date(year, month);
+    }
+
+    // Categories to display in the chart
+    const categories = [
+      'Broader Founding Team',
+      'Core Team Pool',
+      'Ecosystem Fund',
+      'Protocol Development Fund',
+      'Early Supporters',
+      'Public Allocation',
+      'SKALE Foundation',
+      'Validators Rewards'
+    ];
+
+    // Color scheme
+    const colorScale = d3.scaleOrdinal()
+      .domain(categories)
+      .range([
+        '#4e79a7', '#f28e2c', '#e15759', '#76b7b2', 
+        '#59a14f', '#edc949', '#af7aa1', '#ff9da7'
+      ]);
+
+    // Format large numbers
+    function formatNumber(num) {
+      if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1) + 'B';
+      } else if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+      } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+      }
+      return num;
+    }
+
+    // Create the chart
+    function createChart() {
+      // Clear any existing chart
+      d3.select('#chart').html('');
+      
+      // Set up dimensions
+      const margin = { top: 40, right: 30, bottom: 50, left: 80 };
+      const chartElement = document.getElementById('chart');
+      const width = chartElement.clientWidth - margin.left - margin.right;
+      const height = chartElement.clientHeight - margin.top - margin.bottom;
+      
+      // Create SVG
+      const svg = d3.select('#chart')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+      
+      // Create tooltip
+      const tooltip = d3.select('body')
+        .append('div')
+        .attr('class', 'tooltip')
+        .style('opacity', 0);
+      
+      // X scale
+      const x = d3.scaleLinear()
+        .domain(d3.extent(data, d => d['End of Month']))
+        .range([0, width]);
+      
+      // Y scale
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d['Circulating Supply']) * 1.05])
+        .range([height, 0]);
+      
+      // Stack the data
+      const stack = d3.stack()
+        .keys(categories);
+        
+      const stackedData = stack(data);
+      
+      // Create area generator
+      const area = d3.area()
+        .x(d => x(d.data['End of Month']))
+        .y0(d => y(d[0]))
+        .y1(d => y(d[1]))
+        .curve(d3.curveCatmullRom.alpha(0.5));
+      
+      // Add areas to chart
+      svg.selectAll('mylayers')
+        .data(stackedData)
+        .join('path')
+        .attr('class', 'area')
+        .style('fill', d => colorScale(d.key))
+        .attr('d', area)
+        .on('mouseover', function(event, d) {
+          d3.select(this).style('opacity', 1);
+          
+          tooltip.transition()
+            .duration(200)
+            .style('opacity', 0.9);
+          
+          const lastValue = d[d.length - 1];
+          const categoryValue = lastValue.data[d.key];
+          
+          tooltip.html(`
+            <strong>${d.key}</strong><br/>
+            Value: ${formatNumber(categoryValue)}
+          `)
+          .style('left', (event.pageX + 10) + 'px')
+          .style('top', (event.pageY - 28) + 'px');
+        })
+        .on('mouseout', function() {
+          d3.select(this).style('opacity', 0.8);
+          
+          tooltip.transition()
+            .duration(500)
+            .style('opacity', 0);
+        });
+      
+      // Add X axis
+      // data.length / 2 === only show half the months which makes the chart look cleaner
+      svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(data.length / 2).tickFormat(d => {
+          const date = getDateFromIndex(d);
+          const stringDate = date.toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })
+          return stringDate;
+        }));
+      
+      // Add X axis label
+      svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('x', width / 2)
+        .attr('y', height + margin.bottom - 10)
+        .text('Time (Months)');
+      
+      // Add Y axis
+      svg.append('g')
+        .call(d3.axisLeft(y).tickFormat(d => formatNumber(d)));
+      
+      // Add Y axis label
+      svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', -margin.left + 20)
+        .attr('x', -height / 2)
+        .text('Token Amount');
+      
+      // Add chart title
+      svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', -10)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .text('SKALE Token Distribution');
+    }
+    
+    // Create the legend
+    function createLegend() {
+      const legend = document.getElementById('legend');
+      legend.innerHTML = '';
+      
+      categories.forEach(category => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        
+        const colorBox = document.createElement('div');
+        colorBox.className = 'legend-color';
+        colorBox.style.backgroundColor = colorScale(category);
+        
+        const label = document.createElement('span');
+        label.textContent = category;
+        
+        item.appendChild(colorBox);
+        item.appendChild(label);
+        legend.appendChild(item);
+      });
+    }
+    
+    // Initialize the visualization
+    function init() {
+      createChart();
+      createLegend();
+      
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        createChart();
+      });
+    }
+    
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', init);
+    // Also try to run init directly in case DOMContentLoaded already fired
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+      init();
+    }
+  </script>
+</body>
+</html>
