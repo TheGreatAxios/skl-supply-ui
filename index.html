@@ -1644,8 +1644,19 @@
             const startMonth = new Date(2020, 10); // October 2020 (Start) - November End
             const maxSupply = 7000000000;
 
+            const predefinedOrder = [
+            	"Validators Rewards",
+                "SKALE Foundation",
+                "Broader Founding Team",
+                "Core Team Pool",
+                "Ecosystem Fund",
+                "Protocol Development Fund",
+                "Early Supporters",
+                "Public Allocation"
+            ];
+
             // Initialize categories
-            const categories = [
+            let categories = [
                 "Validators Rewards",
                 "SKALE Foundation",
                 "Broader Founding Team",
@@ -1655,6 +1666,10 @@
                 "Early Supporters",
                 "Public Allocation",
             ];
+
+            function reorderArray(array, predefinedOrder) {
+			    return predefinedOrder.filter(item => array.includes(item));
+			}
 
             function getDateFromIndex(index) {
                 const date = new Date(startMonth);
@@ -2025,6 +2040,26 @@
                     item.appendChild(colorBox);
                     item.appendChild(label);
                     legend.appendChild(item);
+
+                    item.addEventListener("mouseover", function(event) {
+                    	item.style.cursor = "pointer";
+                    })
+
+                    item.addEventListener("click", function(event) {
+                    	let _categories = categories;
+                    	if (_categories.includes(category)) {
+                    		_categories = _categories.filter(function(c) {
+                    			return c !== category;
+                    		});
+                    		item.style.textDecoration = "line-through";
+                    	} else {
+                    		_categories.push(category);
+                    		item.style.textDecoration = "none";
+                    	}
+
+                    	categories = reorderArray(_categories, predefinedOrder);
+                    	createChart();
+                    });
                 });
             }
 
