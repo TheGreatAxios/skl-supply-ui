@@ -1900,7 +1900,7 @@
                 // Initial update
                 updateMonthDisplay(currentIndex);
                 updateValueDisplay(currentIndex);
-                monthLine.attr("x1", x(1)).attr("x2", x(1));
+                monthLine.attr("x1", x(currentIndex)).attr("x2", x(currentIndex));
                 monthSlider.value = currentIndex;
             }
 
